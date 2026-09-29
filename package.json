@@ -1,0 +1,6 @@
+{
+  "name": "ai-tell",
+  "version": "0.1.0",
+  "description": "Evidence-based authorship transparency and revision tool",
+  "main": "electron/main.js"
+}

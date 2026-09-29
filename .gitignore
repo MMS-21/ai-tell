@@ -1,0 +1,20 @@
+# --- Dependencies (recreated by `npm install`) ---
+node_modules/
+
+# --- Build output (recreated by `npm run build`; packaged into app.asar at release) ---
+/electron/renderer/dist/
+
+# --- Packaged / generated app artifacts ---
+*.asar
+*.asar.backup*
+*.old.exe
+
+# --- OS / editor junk ---
+Thumbs.db
+.DS_Store
+*.log
+
+# NOTE: python/dist/aitell-backend.exe IS tracked on purpose.
+# The backend exists only as a compiled PyInstaller binary (no Python source
+# is available in this repo), so the exe is treated as a vendored dependency
+# required to build a complete app package.
