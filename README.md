@@ -8,6 +8,24 @@ ai-tell is a desktop application that audits documents for provenance signals an
 
 ---
 
+## About
+
+Modern documents rarely carry a clear story of who wrote them. Text moves between authors, editors, and AI assistants, and what's left behind — metadata traces, statistical watermarks, telltale phrasing — is either invisible or unreadable to the people who need it.
+
+**ai-tell makes that evidence visible.** It inspects a document for provenance signals and writing patterns, explains each finding in plain language, and gives you practical next steps: clean a document before sharing it, revise it toward your own voice, verify what changed, or build a style baseline you can compare against later.
+
+### Who it's for
+
+- **Writers and editors** who want to understand what a document reveals about its authorship
+- **Researchers and reviewers** checking the provenance of submitted material
+- **Anyone** who needs to clean, revise, or audit documents with evidence instead of guesswork
+
+### How it keeps your data private
+
+All analysis runs **locally on your machine**. The bundled backend listens only on `127.0.0.1`, and the app makes no network calls to third-party services — your documents never leave your device.
+
+---
+
 ## Features
 
 | Tab | What it does |
@@ -181,3 +199,13 @@ flowchart LR
 - [ ] Wire the Clean/Revise option checkboxes through to the backend API calls
 - [ ] LLM-assisted revision via a local Ollama server
 - [ ] Persist the language choice (English / Arabic) across restarts
+
+---
+
+## License
+
+Copyright © 2026 Moaaz Magdy. All rights reserved.
+
+ai-tell is **proprietary software**. No rights to use, copy, modify, merge, publish, distribute, sublicense, or sell this software are granted, except as expressly permitted in writing by the copyright holder.
+
+See [`LICENSE`](LICENSE) for the full terms.

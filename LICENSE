@@ -1,0 +1,43 @@
+Copyright (c) 2026 Moaaz Magdy. All rights reserved.
+
+ai-tell — Evidence-based authorship transparency and revision tool
+https://github.com/MMS-21/ai-tell
+
+PROPRIETARY SOFTWARE LICENSE
+
+1. Definitions
+   "Software" means ai-tell, including its source code, binaries, assets,
+   documentation, and any modified or derivative versions thereof.
+   "Copyright holder" means Moaaz Magdy.
+
+2. Reservation of rights
+   All rights not expressly granted to you in this License are reserved by
+   the Copyright holder. The Software is licensed, not sold.
+
+3. Restrictions
+   Except as expressly permitted in writing by the Copyright holder, you
+   may not:
+   a) use, copy, modify, merge, or create derivative works of the Software;
+   b) distribute, publish, sublicense, rent, lease, or otherwise make the
+      Software available to any third party;
+   c) reverse engineer, decompile, or disassemble the Software, except and
+      only to the extent that such activity is permitted by applicable law
+      notwithstanding this limitation.
+
+4. Ownership
+   The Software is protected by copyright laws and international treaty
+   provisions. The Copyright holder retains all ownership and intellectual
+   property rights in and to the Software.
+
+5. Termination
+   This License terminates automatically if you breach any of its terms.
+   Upon termination you must cease all use of the Software and destroy all
+   copies in your possession.
+
+6. No warranty
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+   NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR
+   ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM, IN CONNECTION
+   WITH, OR IN USE OF THE SOFTWARE.
