@@ -10,6 +10,7 @@ import {
   User, FileType, Sparkles, Languages,
   Download, RefreshCw
 } from 'lucide-react';
+import { HelpTip } from './HelpTip';
 
 type Lang = 'en' | 'ar';
 
@@ -42,7 +43,7 @@ const translations = {
     includeInPackage: 'Include in package',
     analysisReport: 'Analysis report', verificationReport: 'Verification report',
     revisionSuggestions: 'Revision suggestions', sessionLog: 'Session log', auditLog: 'Audit log',
-    dragDrop: 'Drag & drop or click to select document...',
+    dragDrop: 'Click to select document...',
     analysisComplete: 'Analysis complete', cleaned: 'Cleaned', revisionGenerated: 'Revision suggestions generated',
     verificationComplete: 'Verification complete', auditCreated: 'Audit package created',
     baselineCreated: 'Baseline "{name}" created',
@@ -97,6 +98,35 @@ const translations = {
     restartToUpdate: 'Restart to update',
     installing: 'Installing…',
     updateFailed: 'Update failed',
+    tips: {
+      filePicker: 'Browse for the document to work with — DOCX, TEX, PDF, MD or TXT. The trash button removes the current selection.',
+      clearFile: 'Removes the selected document.',
+      options: 'Choose how this tool processes your document.',
+      globalFile: 'The working document for the current tab. Click to browse — the selection is shared across tabs.',
+      baselineSelect: 'Compare the document against a saved author style profile (created in the Baseline tab) to highlight style deviations. Choose "None" for a generic analysis.',
+      analyzeBtn: 'Runs a full analysis — statistics, style markers, pattern evidence, metadata and hidden characters — and shows the report below.',
+      stripMetadata: 'Removes EXIF/XMP metadata and hidden document properties, keeping only the title and author.',
+      enableLayerB: 'Statistically rewrites sentence structure to weaken watermark signals left by AI writing tools.',
+      runDetection: 'Scans the document before and after cleaning so you can compare the results.',
+      cleanBtn: 'Creates a cleaned copy of the document (.docx). You will be asked where to save it.',
+      useLLM: 'Uses a local Ollama model to generate rewrite suggestions. Ollama must be installed and running on this computer.',
+      enableBaseline: 'Compares the document with a saved author baseline while preparing suggestions.',
+      sessionFile: 'Paste the path of a session.json from an earlier run to resume where you stopped.',
+      reviseBtn: 'Generates rewrite suggestions and writes a session file — you choose where to save both.',
+      verifyBtn: 'Compares the original and revised documents and writes a JSON verification report you choose where to save.',
+      includeGroup: 'Pick which artifacts to bundle into the audit package.',
+      incAnalysis: 'The report from the Analyze tab: statistics, style markers, patterns and metadata.',
+      incVerification: 'The comparison report from the Verify tab.',
+      incRevision: 'The rewrite suggestions produced by the Revise tab.',
+      incSessionLog: 'The session history of the revision run (for traceability).',
+      incAuditLog: 'The log of actions performed while creating this package.',
+      auditBtn: 'Bundles the selected artifacts into a ZIP archive — you choose where to save it.',
+      baselineSamples: 'Select 3–5 sample documents written by the author so the app can learn their style profile.',
+      baselineNameInput: 'A name for the new style profile.',
+      createBaselineBtn: 'Creates the profile from the selected samples and adds it to Existing Baselines.',
+      existingBaselinesHead: 'Saved style profiles. "View" shows the profile details.',
+      viewBaseline: 'Opens the details of this style profile.',
+    },
   },
   ar: {
     analyze: 'تحليل', clean: 'تنظيف', revise: 'مراجعة', verify: 'تحقق', audit: 'تدقيق', baseline: 'خط أساس',
@@ -126,7 +156,7 @@ const translations = {
     includeInPackage: 'تضمين في الحزمة',
     analysisReport: 'تقرير التحليل', verificationReport: 'تقرير التحقق',
     revisionSuggestions: 'اقتراحات المراجعة', sessionLog: 'سجل الجلسة', auditLog: 'سجل التدقيق',
-    dragDrop: 'اسحب وأفلت أو انقر لاختيار مستند...',
+    dragDrop: 'انقر لاختيار مستند...',
     analysisComplete: 'اكتمل التحليل', cleaned: 'تم التنظيف', revisionGenerated: 'تم إنشاء اقتراحات المراجعة',
     verificationComplete: 'اكتمل التحقق', auditCreated: 'تم إنشاء حزمة التدقيق',
     baselineCreated: 'تم إنشاء خط الأساس "{name}"',
@@ -181,6 +211,35 @@ const translations = {
     restartToUpdate: 'أعد التشغيل للتحديث',
     installing: 'جارٍ التثبيت…',
     updateFailed: 'فشل التحديث',
+    tips: {
+      filePicker: 'تصفّح لاختيار المستند الذي ستعمل عليه — DOCX أو TEX أو PDF أو MD أو TXT. زر سلة المهملات يزيل الاختيار الحالي.',
+      clearFile: 'يزيل المستند المحدد.',
+      options: 'اختر طريقة معالجة الأداة لمستندك.',
+      globalFile: 'المستند المستخدم في التبويب الحالي. انقر للتصفّح — الاختيار مشترك بين التبويبات.',
+      baselineSelect: 'قارن المستند بملف أسلوب كاتب محفوظ (يُنشأ في تبويب خط الأساس) لإبراز الانحرافات الأسلوبية. اختر "بدون" لتحليل عام.',
+      analyzeBtn: 'يشغّل تحليلاً كاملاً — الإحصاءات وعلامات أسلوب الكتابة وأدلة الأنماط والبيانات الوصفية والأحرف المخفية — ويعرض التقرير بالأسفل.',
+      stripMetadata: 'يحذف البيانات الوصفية EXIF/XMP وخصائص المستند المخفية، مع الاحتفاظ بالعنوان والمؤلف فقط.',
+      enableLayerB: 'يعيد كتابة بنية الجُمل إحصائياً لتقليل إشارات العلامة المائية التي تتركها أدوات الكتابة بالذكاء الاصطناعي.',
+      runDetection: 'يفحص المستند قبل وبعد التنظيف ليمكنك مقارنة النتائج.',
+      cleanBtn: 'ينشئ نسخة نظيفة من المستند (.docx). سيُطلب منك تحديد مكان حفظها.',
+      useLLM: 'يستخدم نموذجاً محلياً عبر Ollama لتوليد اقتراحات إعادة الصياغة. يجب أن يكون Ollama مثبتاً وقيد التشغيل على هذا الجهاز.',
+      enableBaseline: 'يقارن المستند بخط أساس الكاتب المحفوظ أثناء إعداد الاقتراحات.',
+      sessionFile: 'الصق مسار ملف session.json من جلسة سابقة للاستئناف من حيث توقفت.',
+      reviseBtn: 'ينشئ اقتراحات إعادة الصياغة ويكتب ملف الجلسة — وأنت تحدد مكان حفظهما.',
+      verifyBtn: 'يقارن المستند الأصلي والمُعدّل ويكتب تقرير تحقق بصيغة JSON تحدد أنت مكان حفظه.',
+      includeGroup: 'اختر الملفات التي تريد تضمينها في حزمة التدقيق.',
+      incAnalysis: 'تقرير تبويب "تحليل": الإحصاءات وعلامات الأسلوب والأنماط والبيانات الوصفية.',
+      incVerification: 'تقرير المقارنة من تبويب "تحقق".',
+      incRevision: 'اقتراحات إعادة الصياغة التي ينتجها تبويب "مراجعة".',
+      incSessionLog: 'سجل جلسة عملية المراجعة (للتعقب).',
+      incAuditLog: 'سجل الإجراءات المنفذة أثناء إنشاء هذه الحزمة.',
+      auditBtn: 'يجمع الملفات المحددة في أرشيف ZIP — أنت تحدد مكان الحفظ.',
+      baselineSamples: 'اختر 3–5 مستندات نموذجية بقلم الكاتب ليتعلم التطبيق ملف أسلوبه.',
+      baselineNameInput: 'اسم لملف الأسلوب الجديد.',
+      createBaselineBtn: 'ينشئ الملف من العينات المحددة ويضيفه إلى "خطوط الأساس الموجودة".',
+      existingBaselinesHead: 'ملفات الأسلوب المحفوظة. زر "عرض" يفتح تفاصيل الملف.',
+      viewBaseline: 'يفتح تفاصيل ملف الأسلوب هذا.',
+    },
   },
 };
 
@@ -894,19 +953,24 @@ function App() {
     label,
     file,
     onSelect,
-    onClear
+    onClear,
+    tip
   }: {
     label: string;
     file: FileInfo | null;
     onSelect: () => void;
     onClear?: () => void;
+    tip?: string;
   }) => (
     <div className="card" style={{ padding: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <FileText className="text-muted" size={24} />
           <div>
-            <div style={{ fontWeight: 500 }}>{file ? file.name : label}</div>
+            <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>{file ? file.name : label}</span>
+              <HelpTip text={tip ?? t.tips.filePicker} />
+            </div>
             {file && <div className="text-sm text-muted">{formatBytes(file.size)}</div>}
           </div>
         </div>
@@ -936,7 +1000,10 @@ function App() {
               onClear={() => setFile(null)}
             />
             <div className="input-group" style={{ marginTop: 16 }}>
-              <label className="input-label">{t.authorBaseline}</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <label className="input-label">{t.authorBaseline}</label>
+                <HelpTip text={t.tips.baselineSelect} />
+              </div>
               <select
                 value={selectedBaseline}
                 onChange={e => setSelectedBaseline(e.target.value)}
@@ -946,14 +1013,16 @@ function App() {
                 {baselines.map(b => <option key={b} value={b}>{b}</option>)}
               </select>
             </div>
-            <button
-              className="btn btn-primary mt-4"
-              onClick={handleAnalyze}
-              disabled={loading || !file}
-              style={{ width: '100%', maxWidth: 300 }}
-            >
-              <Search size={16} /> {t.analyzeDocument}
-            </button>
+            <HelpTip text={t.tips.analyzeBtn} block>
+              <button
+                className="btn btn-primary mt-4"
+                onClick={handleAnalyze}
+                disabled={loading || !file}
+                style={{ width: '100%', maxWidth: 300 }}
+              >
+                <Search size={16} /> {t.analyzeDocument}
+              </button>
+            </HelpTip>
           </div>
         );
 
@@ -967,27 +1036,41 @@ function App() {
               onClear={() => setFile(null)}
             />
             <div className="input-group" style={{ marginTop: 16 }}>
-              <label className="input-label">{t.options}</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <label className="input-label">{t.options}</label>
+                <HelpTip text={t.tips.options} />
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" defaultChecked /> {t.stripMetadata}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" /> {t.enableLayerB}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" /> {t.runDetection}
-                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" defaultChecked /> {t.stripMetadata}
+                  </label>
+                  <HelpTip text={t.tips.stripMetadata} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" /> {t.enableLayerB}
+                  </label>
+                  <HelpTip text={t.tips.enableLayerB} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" /> {t.runDetection}
+                  </label>
+                  <HelpTip text={t.tips.runDetection} />
+                </div>
               </div>
             </div>
-            <button
-              className="btn btn-primary mt-4"
-              onClick={handleClean}
-              disabled={loading || !file}
-              style={{ width: '100%', maxWidth: 300 }}
-            >
-              <Shield size={16} /> {t.cleanDocument}
-            </button>
+            <HelpTip text={t.tips.cleanBtn} block>
+              <button
+                className="btn btn-primary mt-4"
+                onClick={handleClean}
+                disabled={loading || !file}
+                style={{ width: '100%', maxWidth: 300 }}
+              >
+                <Shield size={16} /> {t.cleanDocument}
+              </button>
+            </HelpTip>
           </div>
         );
 
@@ -1001,18 +1084,30 @@ function App() {
               onClear={() => setFile(null)}
             />
             <div className="input-group" style={{ marginTop: 16 }}>
-              <label className="input-label">{t.options}</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <label className="input-label">{t.options}</label>
+                <HelpTip text={t.tips.options} />
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" defaultChecked /> {t.useLLM}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" /> {t.enableBaseline}
-                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" defaultChecked /> {t.useLLM}
+                  </label>
+                  <HelpTip text={t.tips.useLLM} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" /> {t.enableBaseline}
+                  </label>
+                  <HelpTip text={t.tips.enableBaseline} />
+                </div>
               </div>
             </div>
             <div className="input-group" style={{ marginTop: 16 }}>
-              <label className="input-label">{t.sessionFile}</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <label className="input-label">{t.sessionFile}</label>
+                <HelpTip text={t.tips.sessionFile} />
+              </div>
               <input
                 type="text"
                 placeholder={t.sessionFilePlaceholder}
@@ -1021,14 +1116,16 @@ function App() {
                 onChange={e => setReviseSession(e.target.value)}
               />
             </div>
-            <button
-              className="btn btn-primary mt-4"
-              onClick={handleRevise}
-              disabled={loading || !file}
-              style={{ width: '100%', maxWidth: 300 }}
-            >
-              <RotateCcw size={16} /> {t.generateRevision}
-            </button>
+            <HelpTip text={t.tips.reviseBtn} block>
+              <button
+                className="btn btn-primary mt-4"
+                onClick={handleRevise}
+                disabled={loading || !file}
+                style={{ width: '100%', maxWidth: 300 }}
+              >
+                <RotateCcw size={16} /> {t.generateRevision}
+              </button>
+            </HelpTip>
           </div>
         );
 
@@ -1048,7 +1145,10 @@ function App() {
               onClear={() => setRevisedFile(null)}
             />
             <div className="input-group" style={{ marginTop: 16 }}>
-              <label className="input-label">{t.authorBaseline}</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <label className="input-label">{t.authorBaseline}</label>
+                <HelpTip text={t.tips.baselineSelect} />
+              </div>
               <select
                 value={selectedBaseline}
                 onChange={e => setSelectedBaseline(e.target.value)}
@@ -1058,14 +1158,16 @@ function App() {
                 {baselines.map(b => <option key={b} value={b}>{b}</option>)}
               </select>
             </div>
-            <button
-              className="btn btn-primary mt-4"
-              onClick={handleVerify}
-              disabled={loading || !file || !revisedFile}
-              style={{ width: '100%', maxWidth: 300 }}
-            >
-              <FileCheck size={16} /> {t.verifyChanges}
-            </button>
+            <HelpTip text={t.tips.verifyBtn} block>
+              <button
+                className="btn btn-primary mt-4"
+                onClick={handleVerify}
+                disabled={loading || !file || !revisedFile}
+                style={{ width: '100%', maxWidth: 300 }}
+              >
+                <FileCheck size={16} /> {t.verifyChanges}
+              </button>
+            </HelpTip>
           </div>
         );
 
@@ -1085,33 +1187,53 @@ function App() {
               onClear={() => setRevisedFile(null)}
             />
             <div className="input-group" style={{ marginTop: 16 }}>
-              <label className="input-label">{t.includeInPackage}</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <label className="input-label">{t.includeInPackage}</label>
+                <HelpTip text={t.tips.includeGroup} />
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" defaultChecked /> {t.analysisReport}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" defaultChecked /> {t.verificationReport}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" defaultChecked /> {t.revisionSuggestions}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" defaultChecked /> {t.sessionLog}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" defaultChecked /> {t.auditLog}
-                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" defaultChecked /> {t.analysisReport}
+                  </label>
+                  <HelpTip text={t.tips.incAnalysis} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" defaultChecked /> {t.verificationReport}
+                  </label>
+                  <HelpTip text={t.tips.incVerification} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" defaultChecked /> {t.revisionSuggestions}
+                  </label>
+                  <HelpTip text={t.tips.incRevision} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" defaultChecked /> {t.sessionLog}
+                  </label>
+                  <HelpTip text={t.tips.incSessionLog} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" defaultChecked /> {t.auditLog}
+                  </label>
+                  <HelpTip text={t.tips.incAuditLog} />
+                </div>
               </div>
             </div>
-            <button
-              className="btn btn-primary mt-4"
-              onClick={handleAudit}
-              disabled={loading || !file}
-              style={{ width: '100%', maxWidth: 300 }}
-            >
-              <History size={16} /> {t.createAudit}
-            </button>
+            <HelpTip text={t.tips.auditBtn} block>
+              <button
+                className="btn btn-primary mt-4"
+                onClick={handleAudit}
+                disabled={loading || !file}
+                style={{ width: '100%', maxWidth: 300 }}
+              >
+                <History size={16} /> {t.createAudit}
+              </button>
+            </HelpTip>
           </div>
         );
 
@@ -1124,9 +1246,13 @@ function App() {
                 label={t.addSampleDocs}
                 file={null}
                 onSelect={handleBaselineAdd}
+                tip={t.tips.baselineSamples}
               />
               <div className="input-group" style={{ marginTop: 16, maxWidth: 300 }}>
-                <label className="input-label">{t.baselineName}</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label className="input-label">{t.baselineName}</label>
+                  <HelpTip text={t.tips.baselineNameInput} />
+                </div>
                 <input
                   type="text"
                   placeholder={t.baselineNamePlaceholder}
@@ -1134,18 +1260,23 @@ function App() {
                   onKeyDown={e => e.key === 'Enter' && handleBaselineAdd()}
                 />
               </div>
-              <button
-                className="btn btn-primary mt-4"
-                onClick={handleBaselineAdd}
-                disabled={loading}
-                style={{ width: '100%', maxWidth: 300 }}
-              >
-                <Zap size={16} /> {t.createBaseline}
-              </button>
+              <HelpTip text={t.tips.createBaselineBtn} block>
+                <button
+                  className="btn btn-primary mt-4"
+                  onClick={handleBaselineAdd}
+                  disabled={loading}
+                  style={{ width: '100%', maxWidth: 300 }}
+                >
+                  <Zap size={16} /> {t.createBaseline}
+                </button>
+              </HelpTip>
             </div>
 
             <div className="card" style={{ padding: 16 }}>
-              <h3 style={{ marginBottom: 16 }}>{t.existingBaselines}</h3>
+              <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <h3>{t.existingBaselines}</h3>
+                <HelpTip text={t.tips.existingBaselinesHead} />
+              </div>
               {baselines.length === 0 ? (
                 <p className="text-sm text-muted">{t.noBaselines}</p>
               ) : (
@@ -1153,12 +1284,14 @@ function App() {
                   {baselines.map(b => (
                     <div key={b} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-sm)' }}>
                       <span style={{ fontWeight: 500 }}>{b}</span>
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => { setSelectedBaseline(b); handleBaselineShow(); }}
-                      >
-                        <Eye size={14} /> {t.view}
-                      </button>
+                      <HelpTip text={t.tips.viewBaseline} align="end">
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => { setSelectedBaseline(b); handleBaselineShow(); }}
+                        >
+                          <Eye size={14} /> {t.view}
+                        </button>
+                      </HelpTip>
                     </div>
                   ))}
                 </div>
@@ -1195,83 +1328,93 @@ function App() {
         </div>
         <nav style={{ display: 'flex', gap: 2 }}>
           {tabConfig.map(tab => (
-            <button
-              key={tab.id}
-              className={`tab ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id as TabId)}
-              title={tab.desc}
-            >
-              <tab.icon size={16} />
-              <span>{tab.label}</span>
-            </button>
+            <HelpTip key={tab.id} text={tab.desc}>
+              <button
+                className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id as TabId)}
+              >
+                <tab.icon size={16} />
+                <span>{tab.label}</span>
+              </button>
+            </HelpTip>
           ))}
         </nav>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{
-            width: 300,
-            position: 'relative'
-          }}>
-            <FileText className="text-muted" style={{ position: 'absolute', insetInlineStart: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', width: 16, height: 16 }} />
-            <input
-              type="text"
-              placeholder={t.dragDrop}
-              style={{
-                width: '100%',
-                padding: isRTL ? '8px 36px 8px 12px' : '8px 12px 8px 36px',
-                fontSize: 13,
-                background: 'var(--bg-tertiary)',
-                border: '1px solid var(--border-color)'
-              }}
-              onClick={() => handleFileSelect().then(f => f && setFile(f[0]))}
-              readOnly
-              value={file?.name || ''}
-            />
-          </div>
+          <HelpTip text={t.tips.globalFile} align="end">
+            <div style={{
+              width: 300,
+              position: 'relative'
+            }}>
+              <FileText className="text-muted" style={{ position: 'absolute', insetInlineStart: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', width: 16, height: 16 }} />
+              <input
+                type="text"
+                placeholder={t.dragDrop}
+                style={{
+                  width: '100%',
+                  padding: isRTL ? '8px 36px 8px 12px' : '8px 12px 8px 36px',
+                  fontSize: 13,
+                  background: 'var(--bg-tertiary)',
+                  border: '1px solid var(--border-color)'
+                }}
+                onClick={() => handleFileSelect().then(f => f && setFile(f[0]))}
+                readOnly
+                value={file?.name || ''}
+              />
+            </div>
+          </HelpTip>
           {file && (
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={() => setFile(null)}
-            >
-              <Trash2 size={14} /> {t.clear}
-            </button>
+            <HelpTip text={t.tips.clearFile} align="end">
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setFile(null)}
+              >
+                <Trash2 size={14} /> {t.clear}
+              </button>
+            </HelpTip>
           )}
           {updater.phase !== 'idle' && (
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={handleUpdateClick}
-              disabled={updater.phase === 'installing'}
-              data-testid="update-button"
-              title={
+            <HelpTip
+              align="end"
+              text={
                 updater.phase === 'available' ? t.updateTo.replace('{version}', updater.version ?? '')
                 : updater.phase === 'downloaded' ? t.restartToUpdate
+                : updater.phase === 'downloading' ? t.downloading.replace('{percent}', String(updater.percent ?? 0))
                 : t.installing
               }
+            >
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={handleUpdateClick}
+                disabled={updater.phase === 'installing'}
+                data-testid="update-button"
+                style={{ fontWeight: 600 }}
+              >
+                {updater.phase === 'available' && (
+                  <><Download size={14} /><span>{t.updateTo.replace('{version}', updater.version ?? '')}</span></>
+                )}
+                {updater.phase === 'downloading' && (
+                  <><Download size={14} /><span>{t.downloading.replace('{percent}', String(updater.percent ?? 0))}</span></>
+                )}
+                {updater.phase === 'downloaded' && (
+                  <><RefreshCw size={14} /><span>{t.restartToUpdate}</span></>
+                )}
+                {updater.phase === 'installing' && (
+                  <span>{t.installing}</span>
+                )}
+              </button>
+            </HelpTip>
+          )}
+          <HelpTip text={lang === 'en' ? 'التبديل إلى العربية' : 'Switch to English'} align="end">
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
+              aria-label={lang === 'en' ? 'التبديل إلى العربية' : 'Switch to English'}
               style={{ fontWeight: 600 }}
             >
-              {updater.phase === 'available' && (
-                <><Download size={14} /><span>{t.updateTo.replace('{version}', updater.version ?? '')}</span></>
-              )}
-              {updater.phase === 'downloading' && (
-                <><Download size={14} /><span>{t.downloading.replace('{percent}', String(updater.percent ?? 0))}</span></>
-              )}
-              {updater.phase === 'downloaded' && (
-                <><RefreshCw size={14} /><span>{t.restartToUpdate}</span></>
-              )}
-              {updater.phase === 'installing' && (
-                <span>{t.installing}</span>
-              )}
+              <Languages size={14} />
+              <span>{lang === 'en' ? 'عربي' : 'EN'}</span>
             </button>
-          )}
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
-            aria-label={lang === 'en' ? 'التبديل إلى العربية' : 'Switch to English'}
-            title={lang === 'en' ? 'التبديل إلى العربية' : 'Switch to English'}
-            style={{ fontWeight: 600 }}
-          >
-            <Languages size={14} />
-            <span>{lang === 'en' ? 'عربي' : 'EN'}</span>
-          </button>
+          </HelpTip>
         </div>
       </header>
 

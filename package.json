@@ -1,7 +1,7 @@
 {
   "name": "ai-tell",
   "productName": "ai-tell",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Evidence-based authorship transparency and revision tool",
   "main": "electron/main.js",
   "author": "Moaaz Magdy",

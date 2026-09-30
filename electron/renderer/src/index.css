@@ -315,6 +315,80 @@ tr:hover td {
 .toast-error { background: var(--error); color: white; }
 .toast-info { background: var(--accent); color: white; }
 
+/* Help tips ---------------------------------------------------------------- */
+.help-tip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.help-tip--block {
+  display: flex;
+  width: 100%;
+}
+
+.help-tip-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  margin: 0;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: var(--text-muted);
+  cursor: help;
+  line-height: 0;
+}
+
+.help-tip-trigger:hover {
+  color: var(--accent);
+}
+
+.help-tip-trigger:focus-visible {
+  color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.help-tip-bubble {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline-start: 0;
+  z-index: 200;
+  width: max-content;
+  max-width: min(260px, calc(100vw - 32px));
+  padding: 8px 10px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: start;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+
+/* Align the bubble to the anchor's trailing edge near viewport edges. */
+.help-tip--end .help-tip-bubble {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+.help-tip:hover .help-tip-bubble,
+.help-tip:focus-within .help-tip-bubble {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .help-tip-bubble {
+    transition: none;
+  }
+}
+
 .scrollbar-thin::-webkit-scrollbar {
   width: 8px;
   height: 8px;
