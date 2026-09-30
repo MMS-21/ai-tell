@@ -352,8 +352,10 @@ function App() {
     try {
       const path = await window.api.saveFile(defaultName, filters);
       return path;
-    } catch (e) {
-      showToast('error', t.failedToSave);
+    } catch (e: any) {
+      // Surface the underlying reason (e.g. a rejected dialog call) instead of
+      // failing with an unexplained generic message.
+      showToast('error', e?.message ? `${t.failedToSave}: ${e.message}` : t.failedToSave);
       return null;
     }
   }, [lang]);

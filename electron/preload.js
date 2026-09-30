@@ -4,7 +4,7 @@ contextBridge.exposeInMainWorld('api', {
   // File dialogs
   openFile: (filters) => ipcRenderer.invoke('dialog:openFile', filters),
   openFiles: (filters) => ipcRenderer.invoke('dialog:openFiles', filters),
-  saveFile: (defaultName, filters) => ipcRenderer.invoke('dialog:saveFile', filters),
+  saveFile: (defaultName, filters) => ipcRenderer.invoke('dialog:saveFile', defaultName, filters),
   showMessage: (options) => ipcRenderer.invoke('dialog:showMessage', options),
 
   // API calls to Python backend
