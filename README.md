@@ -142,7 +142,7 @@ ai-tell/
 
 ### Build the UI
 
-Requires [Node.js](https://nodejs.org/) 18+.
+Requires [Node.js](https://nodejs.org/) 20+ (CI builds on 24).
 
 ```bash
 cd electron/renderer
@@ -163,19 +163,18 @@ resources/
     └── aitell-backend.exe  # started automatically on port 8765
 ```
 
-To deploy a new build into an installed app (current manual process):
+To deploy a new build, build the installer and run it:
 
-```powershell
-# 1. close ai-tell, then from the repo root:
-Move-Item electron\renderer\node_modules ..\nm.aside
-npx @electron\asar pack . ..\app.asar
-Move-Item ..\nm.aside electron\renderer\node_modules
-
-# 2. replace the installed archive and relaunch
-Copy-Item ..\app.asar "<install-path>\resources\app.asar" -Force
+```bash
+npm run build:win        # → release/ai-tell-Setup.exe
 ```
 
-Automated installer packaging is on the roadmap (see below).
+Or drop the freshly built archive straight into an existing install:
+
+```powershell
+# after npm run build:win
+Copy-Item release\win-unpacked\resources\app.asar "<install-path>\resources\app.asar" -Force
+```
 
 ---
 
@@ -187,28 +186,55 @@ git commit -m "Describe what changed and why"
 git push
 ```
 
-- Bump `version` in the root `package.json` when you cut a release.
 - Keep `main` green: run `npm run build` in `electron/renderer` before pushing UI changes.
 
-### Planned: in-app updates
+### Cutting a release
 
-The target release flow — users press **Update** in the app header and the new version installs itself:
+```bash
+# 1. bump "version" in the root package.json — it must match the tag
+# 2. commit and push
+# 3. tag and push the tag
+git tag v0.1.3
+git push origin v0.1.3
+# → GitHub Actions builds the installer and publishes the release
+```
+
+CI (`.github/workflows/release.yml`) fails fast if the tag and `package.json`
+version disagree, then uploads `ai-tell-Setup.exe`, its blockmap, and
+`latest.yml` — the three files the in-app updater needs. Because the installer
+asset name never changes, this permanent download link keeps working:
+
+```
+https://github.com/MMS-21/ai-tell/releases/latest/download/ai-tell-Setup.exe
+```
+
+### How updates work
+
+The installed app checks GitHub Releases on launch. If a newer version exists,
+an **Update** button appears in the header:
 
 ```mermaid
 flowchart LR
-    Dev["You<br/>edit → commit → tag"] --> GH["GitHub Release<br/>installer + version manifest"]
-    GH -->|"check for updates"| App["App Update button<br/>download → install → restart"]
+    Dev["You: commit → tag vNext"] --> CI["GitHub Actions<br/>builds + publishes release"]
+    CI --> App["App checks on launch<br/>→ Update button"]
+    App -->|first press| DL["Downloads installer<br/>with live progress"]
+    DL -->|second press| Inst["Silent install +<br/>automatic restart"]
 ```
+
+- The main process owns the update flow ([electron-updater](https://www.electron.build/auto-update)); the renderer only renders state.
+- The launch check stays silent when offline or when already on the latest version.
+- If the download finished but the user closed the app instead of pressing **Restart**, the update is applied silently on quit.
 
 ---
 
 ## Roadmap
 
-- [ ] In-app **Update** button backed by GitHub Releases
-- [ ] Automated Windows installer packaging (electron-builder) and release CI
+- [x] In-app **Update** button backed by GitHub Releases
+- [x] Automated Windows installer packaging (electron-builder) and release CI
 - [ ] Wire the Clean/Revise option checkboxes through to the backend API calls
 - [ ] LLM-assisted revision via a local Ollama server
 - [ ] Persist the language choice (English / Arabic) across restarts
+- [ ] Code-sign the installer to remove the Windows SmartScreen warning
 
 ---
 
