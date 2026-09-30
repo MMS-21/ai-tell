@@ -131,6 +131,7 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   try {
+    initAutoUpdater();
     await startPythonBackend();
     createWindow();
   } catch (err) {
@@ -151,6 +152,50 @@ app.on('window-all-closed', () => {
   }
   if (process.platform !== 'darwin') app.quit();
 });
+
+// ---- Auto-updater (installed builds only) ----
+// Source of truth for available versions: GitHub Releases (see build.publish in package.json).
+// The update file app-update.yml in resources/ tells electron-updater which repo to query.
+let autoUpdater = null;
+let updateDownloadedInfo = null;   // set once an update is fully downloaded
+let updateDownloading = false;
+
+function sendUpdaterStatus(status) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('updater:status', status);
+  }
+}
+
+function initAutoUpdater() {
+  if (!app.isPackaged) return; // running from source has no update metadata
+  try {
+    const { autoUpdater: updater } = require('electron-updater');
+    autoUpdater = updater;
+    autoUpdater.autoDownload = false;        // user opts in via the Update button
+    autoUpdater.autoInstallOnAppQuit = true; // a downloaded update applies on quit if the user never presses Restart
+
+    autoUpdater.on('checking-for-update', () => sendUpdaterStatus({ state: 'checking' }));
+    autoUpdater.on('update-available', (info) => sendUpdaterStatus({ state: 'available', version: info.version }));
+    autoUpdater.on('update-not-available', () => sendUpdaterStatus({ state: 'not-available' }));
+    autoUpdater.on('download-progress', (p) => sendUpdaterStatus({
+      state: 'downloading',
+      percent: Math.round(p.percent || 0),
+      transferred: p.transferred,
+      total: p.total
+    }));
+    autoUpdater.on('update-downloaded', (info) => {
+      updateDownloadedInfo = info;
+      sendUpdaterStatus({ state: 'downloaded', version: info.version });
+    });
+    autoUpdater.on('error', (err) => {
+      console.error('[Updater] error:', err);
+      sendUpdaterStatus({ state: 'error', message: (err && err.message) || String(err) });
+    });
+  } catch (err) {
+    console.error('[Updater] failed to initialize:', err);
+    autoUpdater = null;
+  }
+}
 
 // IPC Handlers
 ipcMain.handle('dialog:openFile', async (event, filters) => {
@@ -257,5 +302,56 @@ ipcMain.handle('dialog:openFiles', async (event, filters) => {
 ipcMain.on('progress', (event, data) => {
   if (mainWindow) {
     mainWindow.webContents.send('progress', data);
+  }
+});
+
+// App version (single source of truth: package.json via Electron)
+ipcMain.handle('app:version', () => app.getVersion());
+
+// ---- Auto-updater IPC ----
+ipcMain.handle('updater:check', async () => {
+  if (!autoUpdater) return { state: 'disabled', currentVersion: app.getVersion() };
+  try {
+    const result = await autoUpdater.checkForUpdates();
+    if (!result) {
+      return { state: 'error', message: 'Update check returned no result', currentVersion: app.getVersion() };
+    }
+    return result.isUpdateAvailable
+      ? { state: 'available', version: result.updateInfo.version, currentVersion: app.getVersion() }
+      : { state: 'not-available', currentVersion: app.getVersion() };
+  } catch (err) {
+    console.error('[Updater] check failed:', err);
+    return { state: 'error', message: (err && err.message) || String(err), currentVersion: app.getVersion() };
+  }
+});
+
+ipcMain.handle('updater:download', async () => {
+  if (!autoUpdater) return { state: 'disabled' };
+  if (updateDownloadedInfo) return { state: 'downloaded', version: updateDownloadedInfo.version };
+  if (updateDownloading) return { state: 'downloading' };
+  updateDownloading = true;
+  try {
+    await autoUpdater.downloadUpdate();
+    return { state: 'downloaded', version: updateDownloadedInfo && updateDownloadedInfo.version };
+  } catch (err) {
+    console.error('[Updater] download failed:', err);
+    return { state: 'error', message: (err && err.message) || String(err) };
+  } finally {
+    updateDownloading = false;
+  }
+});
+
+ipcMain.handle('updater:install', () => {
+  if (!autoUpdater || !updateDownloadedInfo) {
+    return { state: 'error', message: 'No update has been downloaded yet' };
+  }
+  const version = updateDownloadedInfo.version;
+  try {
+    // Quit, install silently, relaunch the new version.
+    autoUpdater.quitAndInstall(true, true);
+    return { state: 'installing', version };
+  } catch (err) {
+    console.error('[Updater] install failed:', err);
+    return { state: 'error', message: (err && err.message) || String(err) };
   }
 });

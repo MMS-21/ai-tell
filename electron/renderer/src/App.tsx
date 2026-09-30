@@ -7,7 +7,8 @@ import {
   FileCheck, Zap, History,
   Eye, Code, BarChart3,
   AlertTriangle, Clock,
-  User, FileType, Sparkles, Languages
+  User, FileType, Sparkles, Languages,
+  Download, RefreshCw
 } from 'lucide-react';
 
 type Lang = 'en' | 'ar';
@@ -91,7 +92,11 @@ const translations = {
     lowPerplexity: { title: 'Predictable Language', meaning: 'Word choices are very common and predictable', tip: 'Use more varied and specific vocabulary' },
     lexical: 'lexical', rhetorical: 'rhetorical', structural: 'structural',
     createNewBaseline: 'Create New Baseline',
-    version: 'v0.1.0', appName: 'ai-tell',
+    updateTo: 'Update to v{version}',
+    downloading: 'Downloading {percent}%',
+    restartToUpdate: 'Restart to update',
+    installing: 'Installing…',
+    updateFailed: 'Update failed',
   },
   ar: {
     analyze: 'تحليل', clean: 'تنظيف', revise: 'مراجعة', verify: 'تحقق', audit: 'تدقيق', baseline: 'خط أساس',
@@ -171,7 +176,11 @@ const translations = {
     lowPerplexity: { title: 'لغة متوقعة', meaning: 'اختيارات الكلمات شائعة جداً ومتوقعة', tip: 'استخدم مفردات أكثر تنوعاً وتحديداً' },
     lexical: 'معجمي', rhetorical: 'بلاغي', structural: 'هيكلي',
     createNewBaseline: 'إنشاء خط أساس جديد',
-    version: 'v0.1.0', appName: 'ai-tell',
+    updateTo: 'التحديث إلى v{version}',
+    downloading: 'جارٍ التنزيل {percent}%',
+    restartToUpdate: 'أعد التشغيل للتحديث',
+    installing: 'جارٍ التثبيت…',
+    updateFailed: 'فشل التحديث',
   },
 };
 
@@ -211,6 +220,14 @@ function App() {
   const [baselines, setBaselines] = useState<string[]>([]);
   const [selectedBaseline, setSelectedBaseline] = useState<string>('');
 
+  // Installed app version (from package.json via the main process) and update lifecycle
+  const [appVersion, setAppVersion] = useState('');
+  const [updater, setUpdater] = useState<{
+    phase: 'idle' | 'available' | 'downloading' | 'downloaded' | 'installing';
+    version?: string;
+    percent?: number;
+  }>({ phase: 'idle' });
+
   const t = translations[lang];
   const isRTL = lang === 'ar';
   const tabConfig = getTabConfig(t);
@@ -223,6 +240,49 @@ function App() {
     document.documentElement.lang = lang;
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
   }, [lang, isRTL]);
+
+  // App version + update lifecycle: check once on launch, stream status from main.
+  useEffect(() => {
+    let disposed = false;
+
+    window.api.getVersion()
+      .then(v => { if (!disposed && v) setAppVersion(v); })
+      .catch(e => console.error('Failed to read app version:', e));
+
+    const offStatus = window.api.onUpdaterStatus((status) => {
+      if (disposed) return;
+      if (status.state === 'downloading') {
+        setUpdater(prev => prev.phase === 'idle' ? prev : {
+          ...prev,
+          phase: 'downloading',
+          percent: typeof status.percent === 'number' ? status.percent : prev.percent
+        });
+      } else if (status.state === 'downloaded') {
+        setUpdater(prev => prev.phase === 'idle' ? prev : { ...prev, phase: 'downloaded', version: status.version ?? prev.version });
+      } else if (status.state === 'installing') {
+        setUpdater(prev => prev.phase === 'idle' ? prev : { ...prev, phase: 'installing' });
+      } else if (status.state === 'available') {
+        setUpdater(prev => prev.phase === 'idle' ? { phase: 'available', version: status.version } : prev);
+      } else if (status.state === 'error') {
+        // Revert in-flight states so the user can retry. Errors are toasted only
+        // from the click handlers below — a failed launch check stays silent.
+        setUpdater(prev => {
+          if (prev.phase === 'downloading') return { ...prev, phase: 'available', percent: undefined };
+          if (prev.phase === 'installing') return { ...prev, phase: 'downloaded' };
+          return prev;
+        });
+      }
+    });
+
+    window.api.updaterCheck()
+      .then(res => {
+        if (disposed || !res || res.state !== 'available') return;
+        setUpdater(prev => prev.phase === 'idle' ? { phase: 'available', version: res.version } : prev);
+      })
+      .catch(e => console.error('Update check failed:', e));
+
+    return () => { disposed = true; offStatus(); };
+  }, []);
 
   const loadBaselines = async () => {
     try {
@@ -254,6 +314,38 @@ function App() {
     const id = Date.now();
     setToasts(prev => [...prev, { id, type, message }]);
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
+  };
+
+  // Update button: first press downloads, second press installs and restarts.
+  const handleUpdateClick = async () => {
+    if (updater.phase === 'available') {
+      setUpdater(prev => ({ ...prev, phase: 'downloading', percent: 0 }));
+      try {
+        const res = await window.api.updaterDownload();
+        if (res && res.state === 'downloaded') {
+          setUpdater(prev => ({ ...prev, phase: 'downloaded', version: res.version ?? prev.version }));
+        } else if (res && res.state === 'error') {
+          setUpdater(prev => ({ ...prev, phase: 'available', percent: undefined }));
+          showToast('error', res.message ? `${t.updateFailed}: ${res.message}` : t.updateFailed);
+        }
+      } catch (e: any) {
+        setUpdater(prev => ({ ...prev, phase: 'available', percent: undefined }));
+        showToast('error', e?.message ? `${t.updateFailed}: ${e.message}` : t.updateFailed);
+      }
+    } else if (updater.phase === 'downloaded') {
+      setUpdater(prev => ({ ...prev, phase: 'installing' }));
+      try {
+        const res = await window.api.updaterInstall();
+        if (res && res.state === 'error') {
+          setUpdater(prev => ({ ...prev, phase: 'downloaded' }));
+          showToast('error', res.message ? `${t.updateFailed}: ${res.message}` : t.updateFailed);
+        }
+        // Success: the main process quits this window, installs, and relaunches.
+      } catch (e: any) {
+        setUpdater(prev => ({ ...prev, phase: 'downloaded' }));
+        showToast('error', e?.message ? `${t.updateFailed}: ${e.message}` : t.updateFailed);
+      }
+    }
   };
 
   const handleSaveFile = useCallback(async (defaultName: string, filters?: any) => {
@@ -1096,7 +1188,7 @@ function App() {
           <img src="/icon.png" alt="ai-tell" style={{ width: 32, height: 32, borderRadius: 8 }} />
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>ai-tell</h1>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>v0.1.0</div>
+            {appVersion && <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>v{appVersion}</div>}
           </div>
         </div>
         <nav style={{ display: 'flex', gap: 2 }}>
@@ -1139,6 +1231,33 @@ function App() {
               onClick={() => setFile(null)}
             >
               <Trash2 size={14} /> {t.clear}
+            </button>
+          )}
+          {updater.phase !== 'idle' && (
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={handleUpdateClick}
+              disabled={updater.phase === 'installing'}
+              data-testid="update-button"
+              title={
+                updater.phase === 'available' ? t.updateTo.replace('{version}', updater.version ?? '')
+                : updater.phase === 'downloaded' ? t.restartToUpdate
+                : t.installing
+              }
+              style={{ fontWeight: 600 }}
+            >
+              {updater.phase === 'available' && (
+                <><Download size={14} /><span>{t.updateTo.replace('{version}', updater.version ?? '')}</span></>
+              )}
+              {updater.phase === 'downloading' && (
+                <><Download size={14} /><span>{t.downloading.replace('{percent}', String(updater.percent ?? 0))}</span></>
+              )}
+              {updater.phase === 'downloaded' && (
+                <><RefreshCw size={14} /><span>{t.restartToUpdate}</span></>
+              )}
+              {updater.phase === 'installing' && (
+                <span>{t.installing}</span>
+              )}
             </button>
           )}
           <button

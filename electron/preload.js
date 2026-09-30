@@ -16,10 +16,23 @@ contextBridge.exposeInMainWorld('api', {
   baseline: (action, name, files) => ipcRenderer.invoke('api:baseline', { action, name, files }),
   health: () => ipcRenderer.invoke('api:health'),
 
+  // App info & updates
+  getVersion: () => ipcRenderer.invoke('app:version'),
+  updaterCheck: () => ipcRenderer.invoke('updater:check'),
+  updaterDownload: () => ipcRenderer.invoke('updater:download'),
+  updaterInstall: () => ipcRenderer.invoke('updater:install'),
+
   // Progress events
   onProgress: (callback) => {
     const listener = (_event, data) => callback(data);
     ipcRenderer.on('progress', listener);
     return () => ipcRenderer.removeListener('progress', listener);
+  },
+
+  // Updater status events (checking/available/downloading percent/downloaded/installing/error)
+  onUpdaterStatus: (callback) => {
+    const listener = (_event, data) => callback(data);
+    ipcRenderer.on('updater:status', listener);
+    return () => ipcRenderer.removeListener('updater:status', listener);
   }
 });

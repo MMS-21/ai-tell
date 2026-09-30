@@ -1,0 +1,54 @@
+name: Release
+
+# Pushing a version tag (v*) builds the Windows installer and publishes a
+# GitHub Release with the assets the in-app updater needs:
+#   ai-tell-Setup.exe, ai-tell-Setup.exe.blockmap, latest.yml
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # The updater compares app.getVersion() against the release version,
+      # so a mismatched tag would break in-app updates.
+      - name: Verify tag matches package.json version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}".TrimStart('v')
+          $pkg = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($tag -ne $pkg) {
+            Write-Error "Tag v$tag does not match package.json version $pkg"
+            exit 1
+          }
+
+      - name: Install dependencies (root)
+        run: npm ci
+
+      - name: Install dependencies (renderer)
+        run: npm ci
+        working-directory: electron/renderer
+
+      - name: Build installer
+        run: npm run build:win
+
+      - name: Publish release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/ai-tell-Setup.exe
+            release/ai-tell-Setup.exe.blockmap
+            release/latest.yml
+          generate_release_notes: true
