@@ -279,7 +279,12 @@ ipcMain.handle('api:baseline', async (event, { action, name, files }) => {
 ipcMain.handle('api:health', async () => {
   try {
     const res = await fetch(`http://127.0.0.1:${pythonPort}/health`);
-    return res.ok ? { status: 'ok' } : { status: 'error' };
+    if (!res.ok) return { status: 'error' };
+    // The app version (package.json) is the single source of truth for releases.
+    // The backend binary carries its own baked-in build number, which can drift
+    // from the release version — expose it separately for diagnostics only.
+    const body = await res.json().catch(() => null);
+    return { status: 'ok', version: app.getVersion(), backendVersion: body && body.version };
   } catch {
     return { status: 'unavailable' };
   }

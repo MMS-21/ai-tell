@@ -9,6 +9,7 @@ node_modules/
 *.asar.backup*
 *.old.exe
 /release/
+/release-*/
 
 # --- OS / editor junk ---
 Thumbs.db
