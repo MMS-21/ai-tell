@@ -1,6 +1,57 @@
 {
   "name": "ai-tell",
+  "productName": "ai-tell",
   "version": "0.1.0",
   "description": "Evidence-based authorship transparency and revision tool",
-  "main": "electron/main.js"
+  "main": "electron/main.js",
+  "author": "Moaaz Magdy",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build:renderer": "npm run build --prefix electron/renderer",
+    "build:win": "npm run build:renderer && electron-builder --win",
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.mms21.aitell",
+    "productName": "ai-tell",
+    "copyright": "Copyright © 2026 Moaaz Magdy",
+    "artifactName": "ai-tell-Setup.exe",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/main.js",
+      "electron/preload.js",
+      "electron/renderer/dist/**",
+      "assets/**"
+    ],
+    "extraResources": [
+      {
+        "from": "python/dist/aitell-backend.exe",
+        "to": "python/aitell-backend.exe"
+      }
+    ],
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ai-tell",
+      "deleteAppDataOnUninstall": false
+    }
+  }
 }
