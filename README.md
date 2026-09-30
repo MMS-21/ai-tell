@@ -8,6 +8,16 @@ ai-tell is a desktop application that audits documents for provenance signals an
 
 ---
 
+## Download
+
+**[⬇️ Download ai-tell for Windows](https://github.com/MMS-21/ai-tell/releases/latest/download/ai-tell-Setup.exe)** — 112 MB
+
+This link always serves the latest version. Run `ai-tell-Setup.exe`, and the one-click installer finishes the job: the app is installed for your user account with a desktop shortcut — no GitHub account, no extra steps.
+
+> **Note:** the build is not code-signed yet, so Windows SmartScreen may show *"Windows protected your PC"* on first run. Click **More info → Run anyway**. Code signing is on the roadmap.
+
+---
+
 ## About
 
 Modern documents rarely carry a clear story of who wrote them. Text moves between authors, editors, and AI assistants, and what's left behind — metadata traces, statistical watermarks, telltale phrasing — is either invisible or unreadable to the people who need it.
